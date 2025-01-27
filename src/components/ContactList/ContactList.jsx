@@ -1,29 +1,19 @@
-import styles from './Options.module.css';
-function Button({ name, onClick }) {
-  return (
-    <button className={styles.button} onClick={onClick}>
-      {name}
-    </button>
-  );
-}
-
-export default function Options({
-  buttons,
-  handleClick,
-  showReset,
-  resetFeedback,
-}) {
-  const markup = Object.keys(buttons).map(button => (
-    <li key={button}>
-      <Button onClick={() => handleClick(button)} name={button} />
-    </li>
-  ));
-  if (showReset) {
-    markup.push(
-      <li key="reset">
-        <Button onClick={resetFeedback} name="Reset" />
+import s from './ContactList.module.css';
+import Contact from '../Contact/Contact';
+const ContactList = ({ initialContacts, onDelete }) => {
+  const markup = initialContacts.map(contact => {
+    return (
+      <li key={contact.id} className={s.item}>
+        <Contact
+          handleDelete={onDelete}
+          name={contact.name}
+          number={contact.number}
+          id={contact.id}
+        />
       </li>
     );
-  }
-  return <ul className={styles.list}>{markup}</ul>;
-}
+  });
+  return <ul className={s.list}>{markup}</ul>;
+};
+
+export default ContactList;

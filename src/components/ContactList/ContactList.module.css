@@ -1,15 +1,20 @@
 .list {
   display: flex;
-  gap: 20px;
-  list-style: none;
-  margin-bottom: 20px;
-  padding: 10px;
-}
-.button {
-  background-color: grey;
+  flex-wrap: wrap;
+  border-radius: 5px;
+  gap: 10px;
   color: black;
-  display: block;
-  border: 1px solid black;
-  border-radius: 4px;
-  text-transform: capitalize;
+}
+.item {
+  display: flex;
+  /* border: 2px solid black; */
+  border-radius: 5px;
+  background-color: var(--sectionColors);
+  gap: 5px;
+  list-style: none;
+  /* margin-bottom: 20px; */
+  padding: 10px;
+  min-width: 240px;
+  justify-content: space-between;
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2), 0 4px 6px rgba(0, 0, 0, 0.1);
 }

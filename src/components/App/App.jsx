@@ -1,54 +1,72 @@
-import { useState } from 'react';
-import { useEffect } from 'react';
-import './App.css';
-import Description from '../description/Description';
-import Options from '../options/Options';
-import Feedback from '../feedback/Feedback';
+import { useState, useEffect } from 'react';
+import './App.module.css';
+import initialContacts from '../../contacts.json';
+import ContactForm from '../ContactForm/ContactForm';
+import ContactList from '../ContactList/ContactList';
+import SearchBox from '../SearchBox/SearchBox';
+import s from './App.module.css';
+import { ImShocked } from 'react-icons/im';
 
 function App() {
-  const [feedback, setFeedback] = useState(() => {
-    const savedFeedback = JSON.parse(window.localStorage.getItem('Feedback'));
-    return savedFeedback || { good: 0, neutral: 0, bad: 0 };
-  });
-  function updateFeedback(feedbackType) {
-    setFeedback(prev => ({
-      ...prev,
-      [feedbackType]: prev[feedbackType] + 1,
-    }));
-  }
-  useEffect(() => {
-    window.localStorage.setItem('Feedback', JSON.stringify(feedback));
-  }, [feedback]);
-  function resetFeedback() {
-    window.localStorage.clear();
-    setFeedback({
-      good: 0,
-      neutral: 0,
-      bad: 0,
-    });
-  }
-  const totalFeedback = Object.values(feedback).reduce(
-    (acc, value) => acc + value,
-    0
+  const [contacts, setContacts] = useState(initialContacts);
+  const [filter, setFilter] = useState('');
+  const initialValues = { name: '', number: '' };
+  const handleSubmit = (values, actions) => {
+    const isContactExist = contacts.some(
+      contact => contact.name === values.name
+    );
+    if (isContactExist) {
+      alert(`${values.name} is already in contacts`);
+      return;
+    }
+    const newContact = {
+      id: crypto.randomUUID(),
+      name: values.name,
+      number: values.number,
+    };
+    setContacts(prevState => [newContact, ...prevState]);
+    actions.resetForm();
+  };
+  const filterContact = contacts.filter(contact =>
+    contact.name.toLowerCase().includes(filter.toLowerCase())
   );
-  const positiveFeedback = totalFeedback
-    ? Math.round(((feedback.good + feedback.neutral) / totalFeedback) * 100)
-    : 0;
+  const deleteContact = contactId => {
+    setContacts(contacts =>
+      contacts.filter(contact => contact.id !== contactId)
+    );
+  };
+
+  useEffect(() => {
+    try {
+      const contacts = localStorage.getItem('contacts');
+      const parsedContacts = JSON.parse(contacts);
+      if (parsedContacts) {
+        setContacts(parsedContacts);
+      }
+    } catch (error) {
+      console.error('Error reading from localStorage', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (contacts !== initialContacts) {
+      localStorage.setItem('contacts', JSON.stringify(contacts));
+    }
+  }, [contacts]);
+
   return (
-    <>
-      <Description />
-      <Options
-        buttons={feedback}
-        handleClick={updateFeedback}
-        showReset={totalFeedback > 0}
-        resetFeedback={resetFeedback}
-      />
-      {totalFeedback !== 0 ? (
-        <Feedback names={feedback} positiveFeedback={positiveFeedback} />
+    <div className={s.container}>
+      <h1 className={s.header}>PhoneBook</h1>
+      <ContactForm initialValues={initialValues} submit={handleSubmit} />
+      <SearchBox filter={filter} onFilter={setFilter} />
+      {filterContact.length > 0 ? (
+        <ContactList initialContacts={filterContact} onDelete={deleteContact} />
       ) : (
-        <p className="no-feedback">No feedback yet</p>
+        <h2 className={s.nothingFound}>
+          Nothing found <ImShocked className={s.icon} />{' '}
+        </h2>
       )}
-    </>
+    </div>
   );
 }
 
